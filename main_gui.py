@@ -3,29 +3,23 @@ from tkinter import filedialog, messagebox, simpledialog
 import json
 import os
 import webbrowser
-import winshell
 import re
 
 import DeckGenerator
 
-# --- Configuration des chemins de fichiers ---
-# Détecte si le script est en mode développement via une variable d'environnement
-
 IS_DEV_MODE = os.getenv("ANKI_DEV_MODE", "False").lower() == "true"
 
 if IS_DEV_MODE:
-    RESOURCES_DIR = "resources_dev"  # Dossier pour le mode développement
-    print("Mode DÉVELOPPEMENT ACTIVÉ. Fichiers ressources utilisés : 'resources_dev'.")
+    RESOURCES_DIR = "resources_dev"  # dossier temp debug
+    print("!MODE DEV ACTIF!")
 else:
     RESOURCES_DIR = "resources"  # Dossier par défaut pour la production
-    print("Mode PRODUCTION ACTIVÉ. Fichiers ressources utilisés : 'resources'.")
 
-# Assurez-vous que le dossier ressources (dev ou production) existe
 os.makedirs(RESOURCES_DIR, exist_ok=True)
 
 CONFIG_FILE = os.path.join(RESOURCES_DIR, "config.json")
 CARDS_FILE = os.path.join(RESOURCES_DIR, "cards.json")  # Le fichier de cartes est maintenant un JSON
-# --- Fin de la configuration des chemins ---
+FFMPEG_PATH = os.path.join(os.path.dirname(__file__), 'bin', 'ffmpeg.exe')
 
 
 def load_config():
@@ -34,8 +28,8 @@ def load_config():
             with open(CONFIG_FILE, "r", encoding="utf-8") as f:
                 return json.load(f)
         except json.JSONDecodeError:
-            messagebox.showerror("Oopsie",
-                                 f"Fichier de config '{CONFIG_FILE}' est corrompu, relancer setup")
+            messagebox.showerror("!",
+                                 f"'{CONFIG_FILE}' est corrompu, relancer setup")  # à modifier?
             os.remove(CONFIG_FILE)  # Supprime le fichier corrompu pour qu'on puisse le recréer
     return None
 
@@ -45,39 +39,10 @@ def save_config(config_data):
         json.dump(config_data, f, indent=4)
 
 
-def create_desktop_shortcut():
-    try:
-        exe_path = os.path.abspath(__file__)
-
-        # direct sur le bureau
-        desktop = winshell.desktop()
-        shortcut_name = "Anki Deck Generator"
-        shortcut_path = os.path.join(desktop, f"{shortcut_name}.lnk")
-
-        with winshell.shortcut(shortcut_path) as link:
-            link.path = exe_path
-            link.description = "scuffed mais fonctionne"
-
-        messagebox.showinfo("Raccourci Créé!",
-                            f"c'est quand même plus pratique :)")
-    except ImportError:
-        messagebox.showerror("Erreur de Module",
-                             'BIG FUCK\n'
-                             f'Merci de contacter le dév :)))\n\n'
-                             f'SI TU TE SENS BRAVE:\n'
-                             f'1) installe python (google juste python installeur windows)'
-                             f'2) ouvre ton terminal (appuie sur win+r et tape cmd.exe)\n'
-                             f'3) tape: \'pip install winshell\n'
-                             f'4) redémarre le programme et prie.')
-    except Exception as e:
-        messagebox.showerror("oopsie", f"Impossible de créer le raccourci.\n"
-                                       f"Essaie de relancer en adminstrateur?\nErreur : {e}")
-
-
 def run_setup():
     config = {}
 
-    # --- ÉTAPE 1 : Nom du Deck  ---
+    # 1: Nom du Deck
     deck_name = simpledialog.askstring("Nom du Deck (Étape 1/3)",
                                        "Comme il apparaitra dans Anki", parent=root)
     if not deck_name:
@@ -240,7 +205,7 @@ def update_generate_button_state():
     btn_open_output.config(state="disabled")
 
 
-# --- Card Editor Dialog ---
+# Card Editor Dialog
 
 class CardEditorDialog(tk.Toplevel):
 
@@ -520,9 +485,6 @@ btn_generate.pack(pady=5)
 btn_open_output = tk.Button(frame, text="Ouvrir le Dossier de Sortie (pour trouver le fichier deck)", width=60,
                             command=open_output_folder)
 btn_open_output.pack(pady=5)
-
-btn_shortcut = tk.Button(frame, text="Créer un raccourci sur le Bureau", width=30, command=create_desktop_shortcut)
-btn_shortcut.pack(pady=10)
 
 update_generate_button_state()
 root.mainloop()
