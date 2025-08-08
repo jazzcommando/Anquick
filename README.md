@@ -84,11 +84,10 @@ Distributed under the MIT License. See `LICENSE.txt` for more information.
 
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
-[contributors-shield]: https://img.shields.io/github/contributors/github_username/repo_name.svg?style=for-the-badge
 [issues-shield]: https://img.shields.io/github/issues/github_username/repo_name.svg?style=for-the-badge
-[issues-url]: https://github.com/jazzcommando/anquick/issues
+[issues-url]: https://github.com/jazzcommando/Anquick/issues
 [license-shield]: https://img.shields.io/github/license/github_username/repo_name.svg?style=for-the-badge
-[license-url]: https://github.com/jazzcommando/anquick/blob/master/LICENSE.txt
+[license-url]: https://github.com/jazzcommando/Anquick/blob/master/LICENSE.txt
 
 [product-screenshot]: images/screenshot.png
 
