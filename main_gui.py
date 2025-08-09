@@ -2,7 +2,6 @@ import tkinter as tk
 from tkinter import filedialog, messagebox, simpledialog
 import json
 import os
-import webbrowser
 import re
 
 import DeckGenerator
@@ -13,13 +12,17 @@ if IS_DEV_MODE:
     RESOURCES_DIR = "resources_dev"  # dossier temp debug
     print("!MODE DEV ACTIF!")
 else:
-    RESOURCES_DIR = "resources"  # Dossier par défaut pour la production
+    RESOURCES_DIR = "resources"  # dossier par défaut pour end user
 
 os.makedirs(RESOURCES_DIR, exist_ok=True)
 
 CONFIG_FILE = os.path.join(RESOURCES_DIR, "config.json")
-CARDS_FILE = os.path.join(RESOURCES_DIR, "cards.json")  # Le fichier de cartes est maintenant un JSON
+CARDS_FILE = os.path.join(RESOURCES_DIR, "cards.json")
 FFMPEG_PATH = os.path.join(os.path.dirname(__file__), 'bin', 'ffmpeg.exe')
+
+
+def wipe_dev_folder():
+    os.removedirs(RESOURCES_DIR)  # option pour manuellement wipe ressources debug
 
 
 def load_config():
@@ -30,7 +33,7 @@ def load_config():
         except json.JSONDecodeError:
             messagebox.showerror("!",
                                  f"'{CONFIG_FILE}' est corrompu, relancer setup")  # à modifier?
-            os.remove(CONFIG_FILE)  # Supprime le fichier corrompu pour qu'on puisse le recréer
+            os.remove(CONFIG_FILE)
     return None
 
 
@@ -50,39 +53,8 @@ def run_setup():
         return
     config["deck_name"] = deck_name
 
-    # --- ÉTAPE 2 : Chemin FFMPEG  ---
-    messagebox.showinfo(
-        "FFMPEG : IMPORTANT AS FUCK (Étape 2/3)",
-        "ETAPE 2: Configurer et installer FFMPEG.`\n\n"
-        "FFMPEG est un programme qui permet de convertir un format audio en autre, GLOBALEMENT.\n."
-        "Important car Anki déteste les fichier wav\n"
-        "Donc, on converti tout en MP3.",
-        parent=root
-    )
-    # Proposer d'ouvrir le site FFMPEG avant de demander le chemin
-    if messagebox.askyesno("Télécharger FFMPEG ?", "Telecharger directement FFMPEG? (indice: oui)",
-                           parent=root):
-        webbrowser.open("https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials.zip")
+    #  Dossier d'Export (NOUVEAU DIALOGUE + Nom du fichier)
 
-    # --- quick explication de comment unzip --- #
-    messagebox.showinfo(
-        "Installer FFMPEG",
-        f"Extrait le zip que tu viens de télécharger dans un nouveau dossier. Idéalement,\n"
-        "à un endroit où il sera hors de vue (par exemple, dans C:).\n\n"
-        "L'étape suivante demandera accés à ce nouveau dossier.\n"
-        "Il faudrat selectionner FFMPEG.EXE, quelquepart dans BIN."
-        "",
-        parent=root)
-
-    ffmpeg_path = filedialog.askopenfilename(
-        title="Trouver executable FFMPEG ? (Regarde dans le dossier 'bin')",
-        filetypes=[("Exécutable FFMPEG", "ffmpeg.exe"), ("Tous les fichiers", "*.*")],
-        parent=root
-    )
-    # valeur par defaut "ffmpeg" pour PATH
-    config["ffmpeg_path"] = ffmpeg_path if ffmpeg_path else "ffmpeg"
-
-    # --- ÉTAPE 3 : Dossier d'Export (NOUVEAU DIALOGUE + Nom du fichier) ---
     messagebox.showinfo(
         "Dossier de Sortie (Étape 3/3)",
         f'Dernière étape, choisi donc où ton deck sera sauvegardé.\n\n'
@@ -150,12 +122,8 @@ def run_generator():
         # je prie que que ce message ne pop up jamais
 
 
-# Renommée et modifiée pour créer un fichier JSON par défaut si absent
 def create_default_cards_json():
-    """
-    Crée un fichier cards.json par défaut avec une structure JSON vide ou exemple,
-    si le fichier n'existe pas.
-    """
+    # structure par défaut de cards.json
     if not os.path.exists(CARDS_FILE):
         default_cards_content = [
             {"question": "2+2?", "answer": "4"},
@@ -172,14 +140,11 @@ def create_default_cards_json():
             messagebox.showerror("Oopsie",
                                  f"Impossible de créer '{CARDS_FILE}'. \n\n"
                                  f"Vérifie que le dossier n'est pas en lecture seule?\nErreur : {e}", parent=root)
-    # Plus besoin d'ouvrir le fichier texte, l'édition se fait via le GUI
-    # os.startfile(CARDS_FILE) # Cette ligne est commentée car l'édition se fait via GUI
 
 
 def open_output_folder():
     config = load_config()
     if config:
-        # Extraire chemin complet APKG
         folder = os.path.dirname(config.get("output_filepath", ""))
         if folder and os.path.exists(folder):
             os.startfile(folder)
@@ -461,9 +426,10 @@ def open_deck_editor_gui():
     DeckEditorWindow(root)
 
 
-# GUI principale (root)
+# Elements GUI
+
 root = tk.Tk()
-root.title("Anki Deck Generator: Slightly Less Scuffed")
+root.title('AnQuick: Need for Speed Edition')
 root.geometry("600x400")
 root.resizable(True, True)
 
@@ -485,6 +451,13 @@ btn_generate.pack(pady=5)
 btn_open_output = tk.Button(frame, text="Ouvrir le Dossier de Sortie (pour trouver le fichier deck)", width=60,
                             command=open_output_folder)
 btn_open_output.pack(pady=5)
+
+if IS_DEV_MODE:
+    btn_generate = tk.Button(frame, text="Wipe Ressources_Dev?",
+                             command=wipe_dev_folder)
+
+btn_generate = tk.Button(frame, text="3. Générer/Mettre à jour le deck", width=60, command=run_generator)
+btn_generate.pack(pady=5)
 
 update_generate_button_state()
 root.mainloop()
