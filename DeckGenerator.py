@@ -1,5 +1,3 @@
-# deckgenerator.py : le moteur de generation anki
-
 import genanki
 import re
 import subprocess
@@ -7,6 +5,7 @@ import os
 import json
 
 # setup genanki (global car le modele est fixe)
+
 my_model_id = 1607392319
 my_deck_id = 2059400110  # id du deck pour mise a jour
 card_css = """
