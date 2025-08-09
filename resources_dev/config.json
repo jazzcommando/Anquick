@@ -1,5 +1,5 @@
 {
-    "deck_name": "dfhgj",
-    "ffmpeg_path": "C:/FFMPEG/ffmpeg-7.1.1-essentials_build/bin/ffmpeg.exe",
-    "output_filepath": "C:/FFMPEG/ffmpeg-7.1.1-essentials_build/bin/dfhgj.apkg"
+    "deck_name": "TEst",
+    "output_filepath": "C:/Users/khela/Desktop/TEst.apkg",
+    "ffmpeg_path": "C:\\Users\\khela\\Desktop\\Git Projects\\AnQuick\\bin\\ffmpeg.exe"
 }
